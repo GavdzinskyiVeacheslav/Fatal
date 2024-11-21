@@ -1,28 +1,69 @@
-from itertools import combinations
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
-def find_min_columns(matrix, n, m):
-    columns = list(range(m))
-    for k in range(1, m + 1):
-        for comb in combinations(columns, k):
-            # Check if this combination of columns has at least one 0 in each row
-            if all(any(matrix[i][j] == 0 for j in comb) for i in range(n)):
-                return k, comb
-    return "Impossible", None
+using namespace std;
 
-def main():
-    # Input reading
-    n, m = map(int, input().split())
-    matrix = [list(map(int, input().split())) for _ in range(n)]
-    
-    # Find the solution
-    result, columns = find_min_columns(matrix, n, m)
-    
-    # Output the result
-    if result == "Impossible":
-        print(result)
-    else:
-        print(result)
-        print(" ".join(str(col + 1) for col in columns))
+bool check_combination(const vector<vector<int>>& matrix, const vector<int>& comb, int n) {
+    for (int i = 0; i < n; ++i) {
+        bool has_zero = false;
+        for (int j : comb) {
+            if (matrix[i][j] == 0) {
+                has_zero = true;
+                break;
+            }
+        }
+        if (!has_zero) {
+            return false;
+        }
+    }
+    return true;
+}
 
-if __name__ == "__main__":
-    main()
+pair<int, vector<int>> find_min_columns(const vector<vector<int>>& matrix, int n, int m) {
+    vector<int> columns(m);
+    for (int i = 0; i < m; ++i) {
+        columns[i] = i;
+    }
+
+    for (int k = 1; k <= m; ++k) {
+        vector<bool> v(m);
+        fill(v.begin(), v.begin() + k, true);
+        do {
+            vector<int> comb;
+            for (int i = 0; i < m; ++i) {
+                if (v[i]) {
+                    comb.push_back(i);
+                }
+            }
+            if (check_combination(matrix, comb, n)) {
+                return {k, comb};
+            }
+        } while (prev_permutation(v.begin(), v.end()));
+    }
+    return { -1, {}};
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> matrix(n, vector<int>(m));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            cin >> matrix[i][j];
+        }
+    }
+
+    auto result = find_min_columns(matrix, n, m);
+    if (result.first == -1) {
+        cout << "Impossible" << endl;
+    } else {
+        cout << result.first << endl;
+        for (int col : result.second) {
+            cout << (col + 1) << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
